@@ -60,12 +60,10 @@ def ping(address):
 	# Commande différentes suivant l'os
 	if "indows" in get_os(): # Pas de premier w comme ça qu'il soit maj ou min ça ne change rien
 		command = "ping -n 1 "
-		response_detect = "TTL"
 	else:
 		command = "ping -c 1 "
-		response_detect = "ttl"
-	response = os.popen(command + address).read()
-	if response_detect in response:
+
+	if os.system(command + address) == 0:
 		return True
 	else:
 		return False
