@@ -57,8 +57,15 @@ class timer:
 
 def ping(address):
 	""" Ping une adresse, renvoie vrai si ping réussi et faux si non"""
-	response = os.popen("ping -c 1 " + address)
-	if "ttl" in response.read():
+	# Commande différentes suivant l'os
+	if "indows" in get_os(): # Pas de premier w comme ça qu'il soit maj ou min ça ne change rien
+		command = "ping -n 1 "
+		response_detect = "TTL"
+	else:
+		command = "ping -c 1 "
+		response_detect = "ttl"
+	response = os.popen(command + address).read()
+	if response_detect in response:
 		return True
 	else:
 		return False
@@ -157,3 +164,8 @@ def supervisor_status():
 def scale(value, from_min, from_max, to_min, to_max):
 	""" Fonction qui fait une mise à l'échelle flottante d'une plage à une autre """
 	return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
+
+
+
+if __name__ == "__main__":
+	ping("192.168.1.136")
