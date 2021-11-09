@@ -97,13 +97,9 @@ class yaml_parametres():
 		""" Lire les paramètres et les stocker dans un dictionnaire
 			Lors de l'exécution de cette fonction, les paramètres sont stockés dans self.content et sont renvoyés
 		 """
-		try:	
-			yaml_file = open(self.path, "r")
-		except FileNotFoundError:
-			dict_parameters = {}
-		else:	
-			dict_parameters = yaml.load(yaml_file, Loader=yaml.FullLoader)
-			yaml_file.close()
+		yaml_file = open(self.path, "r")	
+		dict_parameters = yaml.load(yaml_file, Loader=yaml.FullLoader)
+		yaml_file.close()
 		self.content = dict_parameters
 		return dict_parameters
 
