@@ -11,6 +11,7 @@ import platform
 import yaml # Install with "pip install PyYAML"
 import socket
 import logging
+from pythonping import ping as pyping #Installer avec 'pip install pythonping'
 
 
 class timer:
@@ -58,17 +59,10 @@ class timer:
 
 def ping(address):
 	""" Ping une adresse, renvoie vrai si ping réussi et faux si non"""
-	# Commande différentes suivant l'os
-	if "indows" in get_os(): # Pas de premier w comme ça qu'il soit maj ou min ça ne change rien
-		command = "ping -n 1 "
-	else:
-		command = "ping -c 1 "
-
-	if os.system(command + address) == 0:
-		return True
-	else:
+	if "Request timed out" in pyping(address, count=1):
 		return False
-
+	else:
+		return True
 
 def log(msg, output=""):
 	""" Afficher le log dans la sortie standard ou dans un fichier 
