@@ -183,8 +183,12 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 	else:
 		# Si un logger existant a été passé on l'utilise
 		log = existing
-	# On définit le niveau de log
-	# log.setLevel(level)
+	# On définit le niveau de log du logger principal, il doit être égal au plus bas niveau tout handlers confondus
+	if global_level is not None:
+		level = global_level
+	else:
+		level = 1000 # Si pas définit il est mis très haut pour être sur qu'il ne soit pas le min
+	log.setLevel(min((stream_handler_level, file_handler_level, level)))
 	# Format des messages
 	formatter = logging.Formatter(format)
 	if filename == "" and name != "":
