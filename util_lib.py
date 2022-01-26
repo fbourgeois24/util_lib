@@ -59,21 +59,13 @@ class timer:
 
 def ping(address):
 	""" Ping une adresse, renvoie vrai si ping réussi et faux si non"""
-	if "Request timed out" in pyping(address, count=1):
+	result = pyping(address, count=1)
+	if "Request timed out" in str(result):
+		util_lib_log.debug("ping échoué")
 		return False
 	else:
+		util_lib_log.debug("ping réussi")
 		return True
-
-def log(msg, output=""):
-	""" Afficher le log dans la sortie standard ou dans un fichier 
-		Si rien n'est spécifié dans output : sortie standard
-		Si un nom est spécifé un fichier avec ce nom sera créé """
-	if output != "":
-		logFile = open(output, 'a')
-		print(str(dt.datetime.now()) + " -> " + str(msg), file=logFile)
-		logFile.close()
-	else:
-		print(str(dt.datetime.now()) + " -> " + str(msg))
 
 
 class yaml_parametres():
@@ -219,3 +211,6 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 			stream_handler.setLevel(stream_handler_level)
 		log.addHandler(stream_handler)
 	return log
+
+
+util_lib_log = logger("util_lib", file_handler=False)
