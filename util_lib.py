@@ -156,11 +156,14 @@ def scale(value, from_min, from_max, to_min, to_max):
 
 
 
-def logger(name="", existing=None, level=logging.INFO, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
+def logger(name="", existing=None, global_level=None, file_handler_level=logging.WARNING, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
 	""" configurer un logger et renvoyer l'objet configuré
 		name = nom du nouveau logger à créer
 		existing = logger existant à configurer
-		level = niveau du logger (DEBUG, INFO, WARNING, ERROR ou CRITICAL)
+		Niveaux de log (DEBUG, INFO, WARNING, ERROR ou CRITICAL)
+			file_handler_level : niveau de log du fichier, par défaut WARNING
+			stream_handler_level : niveau de log de la console, par défaut DEBUG
+			global_level = s'il est spécifié, il écrase les 2 précédents
 		format = format des messages de log
 		stream_handler = Vrai s'il faut l'activer
 		file_handler = Vrai s'il faut l'activer
@@ -181,7 +184,7 @@ def logger(name="", existing=None, level=logging.INFO, format='%(asctime)s:%(nam
 		# Si un logger existant a été passé on l'utilise
 		log = existing
 	# On définit le niveau de log
-	log.setLevel(level)
+	# log.setLevel(level)
 	# Format des messages
 	formatter = logging.Formatter(format)
 	if filename == "" and name != "":
@@ -197,10 +200,18 @@ def logger(name="", existing=None, level=logging.INFO, format='%(asctime)s:%(nam
 		# Si un file_handler doit être ajouté
 		file_handler = logging.FileHandler(filename)
 		file_handler.setFormatter(formatter)
+		if global_level is not None:
+			file_handler.setLevel(global_level)
+		else:
+			file_handler.setLevel(file_handler_level)
 		log.addHandler(file_handler)
 	if stream_handler:	
 		# Si un stream_handler doit être ajouté
 		stream_handler = logging.StreamHandler()
 		stream_handler.setFormatter(formatter)
+		if global_level is not None:
+			stream_handler.setLevel(global_level)
+		else:
+			stream_handler.setLevel(stream_handler_level)
 		log.addHandler(stream_handler)
 	return log
