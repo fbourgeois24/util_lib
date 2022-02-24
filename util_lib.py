@@ -213,4 +213,21 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 	return log
 
 
+
+def is_int(value):
+	""" Vérifie si une valeur données est convetible en entier """
+	for char in str(value):
+		# Si un caractère n'est pas un chiffre on renvoie faux
+		if not char.isdigit():
+			return False
+	return True 
+
+
+
+
+
+
+
+
+
 util_lib_log = logger("util_lib", file_handler=False)
