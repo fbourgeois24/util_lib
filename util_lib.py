@@ -86,6 +86,8 @@ class yaml_parametres():
 		yaml_file = open(self.path, "r")	
 		dict_parameters = yaml.load(yaml_file, Loader=yaml.FullLoader)
 		yaml_file.close()
+		if dict_parameters is None:
+			dict_parameters = {}
 		self.content = dict_parameters
 		return dict_parameters
 
