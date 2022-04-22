@@ -227,6 +227,27 @@ def is_int(value):
 
 
 
+def hour_change(year):
+	""" Calcule les deux dates des changements d'heure pour l'année donnée et les renvoie """
+	year = int(year)
+	result = {}
+	# Heure d'été le dernier dimanche de mars
+	# Recherche du dernier dimanche de mars
+	for day in range(31, 0, -1):
+		if dt(year, 3, day).weekday() == 6:
+			break
+	result["summer"] = f"{year}-03-{day}"
+
+	# Heure d'hiver le dernier dimanche d'octobre
+	# Recherche du dernier dimanche d'octobre
+	for day in range(31, 0, -1):
+		if dt(year, 10, day).weekday() == 6:
+			break
+	result["winter"] = f"{year}-10-{day}"
+
+	return result
+
+
 util_lib_log = logger("util_lib", file_handler=False)
 
 
