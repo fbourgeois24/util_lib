@@ -6,7 +6,8 @@
 
 import time
 import os, sys
-import datetime as dt
+from datetime import timedelta
+from datetime import datetime as dt
 import platform
 import yaml # Install with "pip install PyYAML"
 import socket
@@ -137,7 +138,7 @@ def supervisor_status():
 	for script in supervisor_status:
 		# rstrip permet de supprimer les espaces à la fin de la chaine de caractère
 		try:
-			dict_scripts[script[:33].rstrip()] = {"status": script[33:43].rstrip(), "pid": script[47:].split(",")[0], "uptime": dt.timedelta(days=int(script[61:].split("day, ")[0]),hours=int(script[61:].split("day,")[1].split(":")[0]) , minutes=int(script[61:].split("day,")[1].split(":")[2]), seconds=int(script[61:].split("day,")[1].split(":")[2]))}
+			dict_scripts[script[:33].rstrip()] = {"status": script[33:43].rstrip(), "pid": script[47:].split(",")[0], "uptime": timedelta(days=int(script[61:].split("day, ")[0]),hours=int(script[61:].split("day,")[1].split(":")[0]) , minutes=int(script[61:].split("day,")[1].split(":")[2]), seconds=int(script[61:].split("day,")[1].split(":")[2]))}
 		except ValueError:
 			# Si la lecture échoue c'est que le script ne tourne pas et il n'y a donc pas plus d'infos
 			dict_scripts[script[:33].rstrip()] = {"status": script[33:43].rstrip()}
@@ -236,14 +237,14 @@ def hour_change(year):
 	for day in range(31, 0, -1):
 		if dt(year, 3, day).weekday() == 6:
 			break
-	result["summer"] = f"{year}-03-{day}"
+	result["summer"] = dt(year, 3, day).date()
 
 	# Heure d'hiver le dernier dimanche d'octobre
 	# Recherche du dernier dimanche d'octobre
 	for day in range(31, 0, -1):
 		if dt(year, 10, day).weekday() == 6:
 			break
-	result["winter"] = f"{year}-10-{day}"
+	result["winter"] = dt(year, 10, day).date()
 
 	return result
 
