@@ -60,6 +60,7 @@ class timer:
 def ping(address):
 	""" Ping une adresse, renvoie vrai si ping réussi et faux si non"""
 	result = pyping(address, count=1)
+	util_lib_log.debug(result)
 	if "Request timed out" in str(result):
 		util_lib_log.debug("ping échoué")
 		return False
@@ -226,10 +227,9 @@ def is_int(value):
 
 
 
-
-
-
-
-
-
 util_lib_log = logger("util_lib", file_handler=False)
+
+
+if __name__ == "__main__":
+	pass
+	ping("192.168.1.131")
