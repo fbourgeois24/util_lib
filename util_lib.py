@@ -10,6 +10,7 @@ from datetime import timedelta
 from datetime import datetime as dt
 import platform
 import yaml # Install with "pip install PyYAML"
+from yamlinclude import YamlIncludeConstructor # Install with 'pip install pyyaml-include'
 import socket
 import logging
 from pythonping import ping as pyping #Installer avec 'pip install pythonping'
@@ -78,6 +79,7 @@ class yaml_parametres():
 	def __init__(self, path, read=False):
 		self.path = path
 		self.content = {}
+		YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir="/".join(self.path.split("/")[:-1]))
 		if read:
 			self.content = self.read()
 
@@ -104,6 +106,7 @@ class yaml_parametres():
 		else:
 			yaml.dump(self.content, yaml_file)
 		yaml_file.close()
+
 
 
 def get_ip(inteface_name="eth0"):

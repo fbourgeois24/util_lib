@@ -1,2 +1,3 @@
 pythonping
 PyYAML
+pyyaml-include
