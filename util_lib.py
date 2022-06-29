@@ -155,7 +155,7 @@ def scale(value, from_min, from_max, to_min, to_max):
 
 
 
-def logger(name="Main", existing=None, global_level=None, file_handler_level=logging.WARNING, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
+def logger(name="Main", existing=None, global_level=None, file_handler_level=logging.INFO, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
 	""" configurer un logger et renvoyer l'objet configuré
 		name = nom du nouveau logger à créer
 		existing = logger existant à configurer
