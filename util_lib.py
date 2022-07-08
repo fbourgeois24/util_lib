@@ -255,6 +255,16 @@ def hour_change(year):
 util_lib_log = logger("util_lib", file_handler=False)
 
 
-if __name__ == "__main__":
-	pass
-	ping("192.168.1.131")
+
+def present_in_list(value, list):
+	""" Regarde si la valeur est présente dans un des éléments de la liste et renvoie un booléen """
+	for item in list:
+		if value in item:
+			return True
+	return False
+
+def get_item_in_list(value, list):
+	""" Regarde si la valeur est présente dans un élément de la liste, si oui renvoie l'élément au complet """
+	for item in list:
+		if value in item:
+			return item
