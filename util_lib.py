@@ -6,14 +6,13 @@
 
 import time
 import os, sys
-from datetime import timedelta
-from datetime import datetime as dt
+import datetime as dt
 import platform
 import yaml # Install with "pip install PyYAML"
-from yamlinclude import YamlIncludeConstructor # Install with 'pip install pyyaml-include'
 import socket
 import logging
 from pythonping import ping as pyping #Installer avec 'pip install pythonping'
+import struct
 
 
 class timer:
@@ -62,7 +61,6 @@ class timer:
 def ping(address):
 	""" Ping une adresse, renvoie vrai si ping réussi et faux si non"""
 	result = pyping(address, count=1)
-	util_lib_log.debug(result)
 	if "Request timed out" in str(result):
 		util_lib_log.debug("ping échoué")
 		return False
@@ -79,7 +77,6 @@ class yaml_parametres():
 	def __init__(self, path, read=False):
 		self.path = path
 		self.content = {}
-		YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir="/".join(self.path.split("/")[:-1]))
 		if read:
 			self.content = self.read()
 
@@ -87,11 +84,9 @@ class yaml_parametres():
 		""" Lire les paramètres et les stocker dans un dictionnaire
 			Lors de l'exécution de cette fonction, les paramètres sont stockés dans self.content et sont renvoyés
 		 """
-		yaml_file = open(self.path, "r", encoding='utf8')	
+		yaml_file = open(self.path, "r")	
 		dict_parameters = yaml.load(yaml_file, Loader=yaml.FullLoader)
 		yaml_file.close()
-		if dict_parameters is None:
-			dict_parameters = {}
 		self.content = dict_parameters
 		return dict_parameters
 
@@ -108,10 +103,28 @@ class yaml_parametres():
 		yaml_file.close()
 
 
-
 def get_ip(inteface_name="eth0"):
 	""" Récupérer l'ip de la carte ethernet de la machine"""
 	return str(os.popen('ifconfig').read().split(inteface_name)[1].split('inet')[1].split('netmask')[0].replace(" ",""))
+
+def get_network_infos(inteface_name="eth0"):
+	""" Récupérer les infos réseau de la machine """
+	data = {}
+	raw_data = str(os.popen('ip a').read().split(inteface_name)[1].split("inet ")[1])
+	# IP
+	data["ip"] = raw_data.split("/")[0]
+	# Masque
+	msk_ln = int(raw_data.split("/")[1].split(" brd")[0])
+	# On déduit le masque complet
+	msk = (1<<32) - (1<<32>>msk_ln)
+	data["msk"] = socket.inet_ntoa(struct.pack(">L", msk))
+	# Broadcast
+	data["brd"] = raw_data.split("brd ")[1].split(" ")[0]
+
+	raw_data = str(os.popen("ip route | grep default").read())
+	data["gtw"] = raw_data.split(inteface_name)[0].split("default via ")[-1].split(" ")[0]
+
+	return data
 
 
 def get_hostname():
@@ -141,7 +154,7 @@ def supervisor_status():
 	for script in supervisor_status:
 		# rstrip permet de supprimer les espaces à la fin de la chaine de caractère
 		try:
-			dict_scripts[script[:33].rstrip()] = {"status": script[33:43].rstrip(), "pid": script[47:].split(",")[0], "uptime": timedelta(days=int(script[61:].split("day, ")[0]),hours=int(script[61:].split("day,")[1].split(":")[0]) , minutes=int(script[61:].split("day,")[1].split(":")[2]), seconds=int(script[61:].split("day,")[1].split(":")[2]))}
+			dict_scripts[script[:33].rstrip()] = {"status": script[33:43].rstrip(), "pid": script[47:].split(",")[0], "uptime": dt.timedelta(days=int(script[61:].split("day, ")[0]),hours=int(script[61:].split("day,")[1].split(":")[0]) , minutes=int(script[61:].split("day,")[1].split(":")[2]), seconds=int(script[61:].split("day,")[1].split(":")[2]))}
 		except ValueError:
 			# Si la lecture échoue c'est que le script ne tourne pas et il n'y a donc pas plus d'infos
 			dict_scripts[script[:33].rstrip()] = {"status": script[33:43].rstrip()}
@@ -155,7 +168,7 @@ def scale(value, from_min, from_max, to_min, to_max):
 
 
 
-def logger(name="Main", existing=None, global_level=None, file_handler_level=logging.INFO, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
+def logger(name="Main", existing=None, global_level=None, file_handler_level=logging.WARNING, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
 	""" configurer un logger et renvoyer l'objet configuré
 		name = nom du nouveau logger à créer
 		existing = logger existant à configurer
@@ -220,51 +233,4 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 	return log
 
 
-
-def is_int(value):
-	""" Vérifie si une valeur données est convetible en entier """
-	for char in str(value):
-		# Si un caractère n'est pas un chiffre on renvoie faux
-		if not char.isdigit():
-			return False
-	return True 
-
-
-
-def hour_change(year):
-	""" Calcule les deux dates des changements d'heure pour l'année donnée et les renvoie """
-	year = int(year)
-	result = {}
-	# Heure d'été le dernier dimanche de mars
-	# Recherche du dernier dimanche de mars
-	for day in range(31, 0, -1):
-		if dt(year, 3, day).weekday() == 6:
-			break
-	result["summer"] = dt(year, 3, day).date()
-
-	# Heure d'hiver le dernier dimanche d'octobre
-	# Recherche du dernier dimanche d'octobre
-	for day in range(31, 0, -1):
-		if dt(year, 10, day).weekday() == 6:
-			break
-	result["winter"] = dt(year, 10, day).date()
-
-	return result
-
-
 util_lib_log = logger("util_lib", file_handler=False)
-
-
-
-def present_in_list(value, list):
-	""" Regarde si la valeur est présente dans un des éléments de la liste et renvoie un booléen """
-	for item in list:
-		if value in item:
-			return True
-	return False
-
-def get_item_in_list(value, list):
-	""" Regarde si la valeur est présente dans un élément de la liste, si oui renvoie l'élément au complet """
-	for item in list:
-		if value in item:
-			return item
