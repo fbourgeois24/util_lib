@@ -2,9 +2,9 @@ import os
 
 try:
 	# On importe tout
-	from util_lib.util_lib import *
+	from util_lib.util_lib import timer, ping, yaml_parametres, get_ip, get_network_infos, get_hostname, get_username, get_os, supervisor_status, scale, logger
 except ModuleNotFoundError:
 	# Si module non trouvé, on installe les dépendances
-	os.popen("pip install --no-cache-dir -r ./util_lib/requirements.txt").read()
-	from util_lib.util_lib import *
+	os.popen(f"pip install --no-cache-dir -r {os.path.dirname(os.path.realpath(__file__))}/requirements.txt").read()
+	from util_lib.util_lib import timer, ping, yaml_parametres, get_ip, get_network_infos, get_hostname, get_username, get_os, supervisor_status, scale, logger
 
