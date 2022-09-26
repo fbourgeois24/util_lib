@@ -69,6 +69,23 @@ def ping(address):
 		return True
 
 
+class Loader(yaml.SafeLoader):
+	""" Custom loader, permet d'inclure des fichiers yaml depuis d'autres via !include """
+
+	def __init__(self, stream):
+		self._root = os.path.split(stream.name)[0]
+		super(Loader, self).__init__(stream)
+
+	def include(self, node):
+		filename = os.path.join(self._root, self.construct_scalar(node))
+		try:
+			with open(filename, 'r') as f:
+				return yaml.load(f, Loader)
+		except FileNotFoundError:
+			return ""
+
+Loader.add_constructor('!include', Loader.include)
+
 class yaml_parametres():
 	""" Gestion des paramètres dans un fichier yaml externe
 		Lors de l'initialisation de la fonction, read permet de directement lire les valeurs qui seront stockées dans self.content
@@ -85,7 +102,7 @@ class yaml_parametres():
 			Lors de l'exécution de cette fonction, les paramètres sont stockés dans self.content et sont renvoyés
 		 """
 		yaml_file = open(self.path, "r")	
-		dict_parameters = yaml.load(yaml_file, Loader=yaml.FullLoader)
+		dict_parameters = yaml.load(yaml_file, Loader=Loader)
 		yaml_file.close()
 		self.content = dict_parameters
 		return dict_parameters
@@ -108,9 +125,19 @@ def get_ip(inteface_name="eth0"):
 	return str(os.popen('ifconfig').read().split(inteface_name)[1].split('inet')[1].split('netmask')[0].replace(" ",""))
 
 def get_network_infos(inteface_name="eth0"):
-	""" Récupérer les infos réseau de la machine """
+	""" Récupérer les infos réseau de la machine 
+		Si interface inconnue, renvoi None
+		Si interface non-connectée, renvoie False
+		Si connecté, renvoie un dict avec les infos
+	"""
 	data = {}
-	raw_data = str(os.popen('ip a').read().split(inteface_name)[1].split("inet ")[1])
+	raw_data = str(os.popen('ip a').read())
+	if inteface_name not in raw_data:
+		return None
+	raw_data = raw_data.split(inteface_name)[1]
+	if not "inet" in raw_data:
+		return False
+	raw_data = raw_data.split("inet ")[1]
 	# IP
 	data["ip"] = raw_data.split("/")[0]
 	# Masque
@@ -234,3 +261,8 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 
 
 util_lib_log = logger("util_lib", file_handler=False)
+
+
+if __name__ == "__main__":
+	yaml_file = yaml_parametres("../secrets.yaml", read=True)
+	print(yaml_file.content)
