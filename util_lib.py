@@ -261,8 +261,3 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 
 
 util_lib_log = logger("util_lib", file_handler=False)
-
-
-if __name__ == "__main__":
-	yaml_file = yaml_parametres("../secrets.yaml", read=True)
-	print(yaml_file.content)
