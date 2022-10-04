@@ -176,7 +176,11 @@ def get_uptime():
 
 def get_cpu_temp():
 	""" Récupérer la température du processeur """
-	return psutil.sensors_temperatures().get("cpu_thermal", 'Inconnu')
+	raw = psutil.sensors_temperatures().get("cpu_thermal")
+	if raw is None:
+		return 'Inconnu'
+	else:
+		return raw[0].current
 
 def get_cpu_load():
 	""" Récupérer la charge du processeur """
