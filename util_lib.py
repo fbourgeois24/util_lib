@@ -210,7 +210,6 @@ def get_network_usage(interface="eth0"):
 	else:
 		return {'in': "Inconnu (vérifiez le nom de l'interface utilisée)", 'out': ""}
 
-
 def supervisor_status():
 	""" Affiche le statut du superviseur (renvoie un dictionnaire avec le nom du script comme clé et un autre dictionnaire contenenant les infos comme valeur) 
 	exemple de retour de la commande de statut du superviseur:
@@ -231,12 +230,9 @@ def supervisor_status():
 		
 	return dict_scripts
 
-
 def scale(value, from_min, from_max, to_min, to_max):
 	""" Fonction qui fait une mise à l'échelle flottante d'une plage à une autre """
 	return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
-
-
 
 def logger(name="Main", existing=None, global_level=None, file_handler_level=logging.WARNING, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
 	""" configurer un logger et renvoyer l'objet configuré
@@ -302,5 +298,34 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 		log.addHandler(stream_handler)
 	return log
 
+class ip_configuration():
+	""" Gestion de la configuration ip de la machine """
+	def __init__(self, interface="eth0"):
+		# Contructeur
+		self.interface = interface
+
+	def read(self, interface=None):
+		''' Lecture de la configuration réseau
+			On renvoi un dict avec les infos
+		'''
+
+		if interface is None:
+			# Si pas d'interface spécifiée, interface par défaut
+			interface = self.interface
+
+		# On lit le fichier dhcpcd.conf pour regarder s'il y a déjà une config ip fixe (précédée du commentaire ip_fixe)
+		with open("/etc/dhcpcd.conf", 'r') as ip_file:
+			ip_file_content = ip_file.read()
+
+		if '# ip_fixe' in ip_file_content:
+			# Il y a déjà une config ip fixe
+			return {"dhcp": False, "ip": "192.168.10.110", "msk": "255.255.255.0", "gtw": "192.168.10.1"}
+
+		else:
+			# Il n'y a pas de config ip fixe, on va chercher l'ip actuelle
+			config_ip = get_network_infos(interface)
+			return {"dhcp": False, "ip": config_ip["ip"], "msk": config_ip["msk"], "gtw": config_ip["gtw"]}
+
+		
 
 util_lib_log = logger("util_lib", file_handler=False)
