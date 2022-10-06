@@ -314,6 +314,10 @@ class ip_configuration():
 			interface = self.interface
 
 		# On lit le fichier dhcpcd.conf pour regarder s'il y a déjà une config ip fixe (précédée du commentaire ip_fixe)
+		if not os.path.exists("/etc/dhcpcd.conf"):
+			# Si pas raspberry
+			return {"dhcp": True, "ip": "", "msk": "", "gtw": ""}
+
 		with open("/etc/dhcpcd.conf", 'r') as ip_file:
 			ip_file_content = ip_file.read()
 
@@ -356,15 +360,16 @@ class ip_configuration():
 			# On supprime la config existante
 			ip_file_content = ip_file_content.split("# ip_fixe")[0]
 
-		# On ajoute la nouvelle config
-		ip_file_content += f"\n\n# ip_fixe\ninterface {interface}\n"
-		# On compte le nombre de bits à 1 dans le masque
-		msk_len = 0
-		for byte in config_ip["msk"].split("."):
-			msk_len += str(bin(int(byte))[2:]).count("1")
-		ip_file_content += f"static ip_address={config_ip['ip']}/{msk_len}\n"
-		ip_file_content += f"static routers={config_ip['gtw']}\n"
-		ip_file_content += "static domain_name_servers=1.1.1.1\n"
+		if not config_ip["dhcp"]:
+			# On ajoute la nouvelle config si pas dhcp
+			ip_file_content += f"\n\n# ip_fixe\ninterface {interface}\n"
+			# On compte le nombre de bits à 1 dans le masque
+			msk_len = 0
+			for byte in config_ip["msk"].split("."):
+				msk_len += str(bin(int(byte))[2:]).count("1")
+			ip_file_content += f"static ip_address={config_ip['ip']}/{msk_len}\n"
+			ip_file_content += f"static routers={config_ip['gtw']}\n"
+			ip_file_content += "static domain_name_servers=1.1.1.1\n"
 
 		# On réécrit le fichier
 		with open("/etc/dhcpcd.conf", 'w') as ip_file:
