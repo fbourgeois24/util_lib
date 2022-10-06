@@ -318,13 +318,61 @@ class ip_configuration():
 			ip_file_content = ip_file.read()
 
 		if '# ip_fixe' in ip_file_content:
+			ip_data = {"dhcp": False}
 			# Il y a déjà une config ip fixe
-			return {"dhcp": False, "ip": "192.168.10.110", "msk": "255.255.255.0", "gtw": "192.168.10.1"}
+			config_ip = ip_file_content.split("# ip_fixe\n")[1].split("\n")
+			for line in config_ip:
+				if "ip_address=" in line:
+					# On en déduit l'ip et le masque
+					ip_data["ip"] = line.split("ip_address=")[1].split("/")[0]
+					msk = (1<<32) - (1<<32>>int(line.split("/")[1]))
+					ip_data["msk"] = socket.inet_ntoa(struct.pack(">L", msk))
+				elif "routers=" in line:
+					# Gatewxay
+					ip_data["gtw"] = line.split("routers=")[1]
+				elif "domain_name_servers=" in line:
+					# DNS
+					ip_data["dns"] = line.split("domain_name_servers=")[1]
 
+			return ip_data
+			
 		else:
 			# Il n'y a pas de config ip fixe, on va chercher l'ip actuelle
 			config_ip = get_network_infos(interface)
-			return {"dhcp": False, "ip": config_ip["ip"], "msk": config_ip["msk"], "gtw": config_ip["gtw"]}
+			return {"dhcp": True, "ip": config_ip["ip"], "msk": config_ip["msk"], "gtw": config_ip["gtw"]}
+
+	def write(self, config_ip, interface=None):
+		""" Ecrire une configuration ip fixe """
+		if interface is None:
+			# Si pas d'interface spécifiée, interface par défaut
+			interface = self.interface
+
+		# On lit le fichier
+		with open("/etc/dhcpcd.conf", 'r') as ip_file:
+			ip_file_content = ip_file.read()
+		
+		# Si une config existe déjà, on la supprime
+		if "# ip_fixe" in ip_file_content:
+			# On supprime la config existante
+			ip_file_content = ip_file_content.split("# ip_fixe")[0]
+
+		# On ajoute la nouvelle config
+		ip_file_content += f"\n\n# ip_fixe\ninterface {interface}\n"
+		# On compte le nombre de bits à 1 dans le masque
+		msk_len = 0
+		for byte in config_ip["msk"].split("."):
+			msk_len += str(bin(int(byte))[2:]).count("1")
+		ip_file_content += f"static ip_address={config_ip['ip']}/{msk_len}\n"
+		ip_file_content += f"static routers={config_ip['gtw']}\n"
+		ip_file_content += "static domain_name_servers=1.1.1.1\n"
+
+		# On réécrit le fichier
+		with open("/etc/dhcpcd.conf", 'w') as ip_file:
+			ip_file.write(ip_file_content)
+
+		# NE PAS OUBLIER DE REDEMARRER LA MACHINE POUR APPLIIQUER LA CONFIG
+
+		return True
 
 		
 
