@@ -107,17 +107,25 @@ class yaml_parametres():
 		self.content = dict_parameters
 		return dict_parameters
 
-	def write(self, dict_parameters=None):
+	def write(self, dict_parameters=None, erase_all=False):
 		""" Ecrire les paramètres dans le fichier yaml 
 			Sauve les paramètres stockés.
 			Si un dictionnaire est passé en paramètre, c'est lui qui est stocké sinon ce sera self.content qui sera stocké
 		"""
-		yaml_file = open(self.path, "w")
-		if dict_parameters is not None:
-			yaml.dump(dict_parameters, yaml_file)
+		if erase_all is False and dict_parameters is None:
+			# Si on écrase pas tout et rien passé, erreur
+			raise ValueError("Aucune valeur à écrire")
+
+		if erase_all is False:
+			# Si on écrase pas tout, on lit le contenu à compléter	
+			with open(self.path, "r") as yaml_file:
+				yaml_file_content = yaml.load(yaml_file, Loader=yaml.FullLoader)
 		else:
-			yaml.dump(self.content, yaml_file)
-		yaml_file.close()
+			yaml_file_content = {}
+
+		with open(self.path, "w") as yaml_file:
+			if dict_parameters is not None:
+				yaml.dump(yaml_file_content | dict_parameters, yaml_file)
 
 		return self.read()
 
