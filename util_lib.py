@@ -119,6 +119,8 @@ class yaml_parametres():
 			yaml.dump(self.content, yaml_file)
 		yaml_file.close()
 
+		return self.read()
+
 
 def get_ip(inteface_name="eth0"):
 	""" Récupérer l'ip de la carte ethernet de la machine"""
