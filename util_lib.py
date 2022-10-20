@@ -101,31 +101,37 @@ class yaml_parametres():
 		""" Lire les paramètres et les stocker dans un dictionnaire
 			Lors de l'exécution de cette fonction, les paramètres sont stockés dans self.content et sont renvoyés
 		 """
-		yaml_file = open(self.path, "r")	
-		dict_parameters = yaml.load(yaml_file, Loader=Loader)
-		yaml_file.close()
+		with open(self.path, "r") as yaml_file:
+			dict_parameters = yaml.load(yaml_file, Loader=Loader)
+		if dict_parameters is None:
+			dict_parameters = {}
+		
 		self.content = dict_parameters
 		return dict_parameters
 
-	def write(self, dict_parameters=None, erase_all=False):
+	def write(self, dict_parameters, erase_all=False):
 		""" Ecrire les paramètres dans le fichier yaml 
 			Sauve les paramètres stockés.
 			Si un dictionnaire est passé en paramètre, c'est lui qui est stocké sinon ce sera self.content qui sera stocké
 		"""
-		if erase_all is False and dict_parameters is None:
-			# Si on écrase pas tout et rien passé, erreur
+		if erase_all is False and dict_parameters == {}:
+			# Si on écrase pas tout et rien à écrire, erreur
 			raise ValueError("Aucune valeur à écrire")
 
 		if erase_all is False:
 			# Si on écrase pas tout, on lit le contenu à compléter	
 			with open(self.path, "r") as yaml_file:
 				yaml_file_content = yaml.load(yaml_file, Loader=yaml.FullLoader)
-		else:
-			yaml_file_content = {}
 
 		with open(self.path, "w") as yaml_file:
-			if dict_parameters is not None:
-				yaml.dump(yaml_file_content | dict_parameters, yaml_file)
+			if erase_all is False:
+				# Si on écrase pas tout, on fusionne les données
+				yaml_file_content.update(dict_parameters)
+			else:
+				# Si on écrase tout, on remplace les données
+				yaml_file_content = dict_parameters
+			
+			yaml.dump(yaml_file_content, yaml_file)
 
 		return self.read()
 
