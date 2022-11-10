@@ -356,6 +356,22 @@ class ip_configuration():
 
 		return True
 
-		
+def get_disks():
+	""" Récupérer les disques branchés et leurs infos """
+	liste_disques = {}
+	raw_data = os.popen("sudo fdisk -l | grep /dev/sd").read().replace('\xa0', ' ').split('\n')
+	for line in raw_data:
+		if line == '':
+			# On passe les lignes vides
+			continue
+		if line[:6] == "Disque":
+			# Il s'agit d'un disque
+			liste_disques[line[7:].split(" ")[0]] = {"taille": " ".join(line.split(" ")[3:5])}
+		else:
+			# Il s'agit d'une partition (on considère qu'elle arrive toujours après le disque)
+			liste_disques[line.split(" ")[0][:8]].setdefault("partitions", {})
+			liste_disques[line.split(" ")[0][:8]]["partitions"][line.split(" ")[0][:8].split('/')[2]] = {"système de fichier": " ".join(line.split(" ")[-2:]),
+				"full_name": line.split(" ")[0][:8]}
+	return liste_disques
 
 util_lib_log = logger("util_lib", file_handler=False)
