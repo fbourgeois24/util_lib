@@ -366,7 +366,7 @@ def get_disks():
 			continue
 		if line[:3] == "Dis":
 			# Il s'agit d'un disque
-			liste_disques[line.split(" ")[1].replace(":", "")] = {"taille": " ".join(line.split(" ")[3:5])}
+			liste_disques[line.split(" ")[1].replace(":", "")] = {"taille": " ".join(line.split(" ")[2:4])}
 		else:
 			# Il s'agit d'une partition (on considère qu'elle arrive toujours après le disque)
 			liste_disques[line.split(" ")[0][:8]].setdefault("partitions", {})
