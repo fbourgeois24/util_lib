@@ -356,10 +356,14 @@ class ip_configuration():
 
 		return True
 
-def get_disks():
+def get_disks(passwd=""):
 	""" Récupérer les disques branchés et leurs infos """
 	liste_disques = {}
-	raw_data = os.popen("sudo fdisk -l | grep /dev/sd").read().replace('\xa0', ' ').split('\n')
+	if passwd != "":
+		string = f"echo '{passwd}' | sudo -S"
+	else:
+		string = "sudo"
+	raw_data = os.popen(f"{string} fdisk -l | grep /dev/sd").read().replace('\xa0', ' ').split('\n')
 	for line in raw_data:
 		if line == '':
 			# On passe les lignes vides
