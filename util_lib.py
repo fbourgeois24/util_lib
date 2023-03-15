@@ -62,10 +62,8 @@ def ping(address):
 	""" Ping une adresse, renvoie vrai si ping réussi et faux si non"""
 	result = pyping(address, count=1)
 	if "Request timed out" in str(result):
-		util_lib_log.debug("ping échoué")
 		return False
 	else:
-		util_lib_log.debug("ping réussi")
 		return True
 
 
@@ -378,4 +376,3 @@ def get_disks(passwd=""):
 				"full_name": line.split(" ")[0][:8]}
 	return liste_disques
 
-util_lib_log = logger("util_lib", file_handler=False)
