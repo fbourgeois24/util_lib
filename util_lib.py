@@ -395,5 +395,12 @@ def bit_read(number, bit):
 		number = nombre à lire
 		bit = numéro du bit à partir de zéro
 	"""
+	# Nombre de bits de travail (taille max du nombre à lire)
+	work_len = 64
 
-	return bin(number)[2:][bit]
+	# On ne récupère que les chiffres
+	bin_number = bin(number)[2:].zfill(work_len)
+	if len(bin_number) > work_len:
+		raise ValueError(f"Le nombre lu doit être de {work_len} bits maximum. Si besoin de plus, augmentez la valeur de 'work_len'.")
+
+	return int(bin_number[work_len-1-bit])
