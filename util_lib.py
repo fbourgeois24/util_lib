@@ -379,3 +379,31 @@ def get_disks(passwd=""):
 				"full_name": line.split(" ")[0][:8]}
 	return liste_disques
 
+def present_in_list(value, list):
+	""" Regarde si la valeur est présente dans un des éléments de la liste et renvoie un booléen """
+	for item in list:
+		if value in item:
+			return True
+	return False
+
+def get_item_in_list(value, list):
+	""" Regarde si la valeur est présente dans un élément de la liste, si oui renvoie l'élément au complet """
+	for item in list:
+		if value in item:
+			return item
+
+
+def bit_read(number, bit):
+	""" Lire un bit d'un nombre
+		number = nombre à lire
+		bit = numéro du bit à partir de zéro
+	"""
+	# Nombre de bits de travail (taille max du nombre à lire)
+	work_len = 64
+
+	# On ne récupère que les chiffres
+	bin_number = bin(number)[2:].zfill(work_len)
+	if len(bin_number) > work_len:
+		raise ValueError(f"Le nombre lu doit être de {work_len} bits maximum. Si besoin de plus, augmentez la valeur de 'work_len'.")
+
+	return int(bin_number[work_len-1-bit])
