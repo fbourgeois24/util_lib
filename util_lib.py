@@ -209,12 +209,13 @@ def scale(value, from_min, from_max, to_min, to_max):
 	""" Fonction qui fait une mise à l'échelle flottante d'une plage à une autre """
 	return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
 
-def logger(name="Main", existing=None, global_level=None, file_handler_level=logging.WARNING, stream_handler_level=logging.DEBUG, format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', stream_handler = True, file_handler = True, filename = ""):
+def logger(name="main", existing=None, global_level=None, file_handler_level=logging.DEBUG, stream_handler_level=logging.DEBUG, 
+	format='%(asctime)s | %(name)s:%(lineno)d [%(levelname)s] - %(message)s', stream_handler = True, file_handler = True, filename = "", remove_existing_handlers=False):
 	""" configurer un logger et renvoyer l'objet configuré
 		name = nom du nouveau logger à créer
 		existing = logger existant à configurer
 		Niveaux de log (DEBUG, INFO, WARNING, ERROR ou CRITICAL)
-			file_handler_level : niveau de log du fichier, par défaut WARNING
+			file_handler_level : niveau de log du fichier, par défaut DEBUG
 			stream_handler_level : niveau de log de la console, par défaut DEBUG
 			global_level = s'il est spécifié, il écrase les 2 précédents
 		format = format des messages de log
@@ -236,6 +237,8 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 	else:
 		# Si un logger existant a été passé on l'utilise
 		log = existing
+	if remove_existing_handlers:
+		log.handlers = []
 	# On définit le niveau de log du logger principal, il doit être égal au plus bas niveau tout handlers confondus
 	if global_level is not None:
 		level = global_level
@@ -255,7 +258,7 @@ def logger(name="Main", existing=None, global_level=None, file_handler_level=log
 		filename += ".log"
 	if file_handler:	
 		# Si un file_handler doit être ajouté
-		file_handler = logging.FileHandler(filename)
+		file_handler = logging.FileHandler(filename, encoding = "UTF-8")
 		file_handler.setFormatter(formatter)
 		if global_level is not None:
 			file_handler.setLevel(global_level)
@@ -376,31 +379,3 @@ def get_disks(passwd=""):
 				"full_name": line.split(" ")[0][:8]}
 	return liste_disques
 
-def present_in_list(value, list):
-	""" Regarde si la valeur est présente dans un des éléments de la liste et renvoie un booléen """
-	for item in list:
-		if value in item:
-			return True
-	return False
-
-def get_item_in_list(value, list):
-	""" Regarde si la valeur est présente dans un élément de la liste, si oui renvoie l'élément au complet """
-	for item in list:
-		if value in item:
-			return item
-
-
-def bit_read(number, bit):
-	""" Lire un bit d'un nombre
-		number = nombre à lire
-		bit = numéro du bit à partir de zéro
-	"""
-	# Nombre de bits de travail (taille max du nombre à lire)
-	work_len = 64
-
-	# On ne récupère que les chiffres
-	bin_number = bin(number)[2:].zfill(work_len)
-	if len(bin_number) > work_len:
-		raise ValueError(f"Le nombre lu doit être de {work_len} bits maximum. Si besoin de plus, augmentez la valeur de 'work_len'.")
-
-	return int(bin_number[work_len-1-bit])
