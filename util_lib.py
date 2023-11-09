@@ -210,7 +210,8 @@ def scale(value, from_min, from_max, to_min, to_max):
 	return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
 
 def logger(name="main", existing=None, global_level=None, file_handler_level=logging.DEBUG, stream_handler_level=logging.DEBUG, 
-	format='%(asctime)s | %(name)s:%(lineno)d [%(levelname)s] - %(message)s', stream_handler = True, file_handler = True, filename = "", remove_existing_handlers=False):
+	format='%(asctime)s | %(name)s:%(lineno)d [%(levelname)s] - %(message)s', stream_handler = True, file_handler = True, filename = "", file_handler_path = "./",
+	remove_existing_handlers=False):
 	""" configurer un logger et renvoyer l'objet configuré
 		name = nom du nouveau logger à créer
 		existing = logger existant à configurer
@@ -258,7 +259,7 @@ def logger(name="main", existing=None, global_level=None, file_handler_level=log
 		filename += ".log"
 	if file_handler:	
 		# Si un file_handler doit être ajouté
-		file_handler = logging.FileHandler(filename, encoding = "UTF-8")
+		file_handler = logging.FileHandler(file_handler_path + filename, encoding = "UTF-8")
 		file_handler.setFormatter(formatter)
 		if global_level is not None:
 			file_handler.setLevel(global_level)
