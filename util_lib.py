@@ -14,6 +14,7 @@ import socket
 import logging
 from pythonping import ping as pyping #Installer avec 'pip install pythonping'
 import struct
+import subprocess
 
 class timer:
 	""" Timer multifonctions basé sur le timestamp
@@ -65,6 +66,30 @@ def ping(address):
 		return False
 	else:
 		return True
+
+def is_ip(addr):
+	""" Regarde si l'adresse est une adresse ip et renvoie un booléen """
+	if addr.count(".") != 3:
+		return False
+	bytes = addr.split(":")[0].split(".")
+	for byte in bytes:
+		if not byte.isdigit():
+			return False
+	return True
+
+def resolve_dn(dn):
+	""" Résoudre un nom de domaine et renvoyer l'ip """
+	dn = dn.split(':')[0]
+	result = subprocess.run(f"ping {dn} -c 1", shell=True, capture_output=True)
+	""" Codes de retour
+		0 = OK
+		1 = Résolution ok mais pas de ping
+		2 = Pas de résolution
+	"""
+	if result.returncode <= 1:
+		return result.stdout.decode().replace(f"PING {dn} (", '').split(')')[0]
+	else:
+		return None
 
 
 class Loader(yaml.SafeLoader):
@@ -408,3 +433,7 @@ def bit_read(number, bit):
 		raise ValueError(f"Le nombre lu doit être de {work_len} bits maximum. Si besoin de plus, augmentez la valeur de 'work_len'.")
 
 	return int(bin_number[work_len-1-bit])
+
+
+local_path = os.path.dirname(os.path.realpath(__file__)) + "/"
+log = logger(name="util_lib", file_handler_path=local_path + "../")
