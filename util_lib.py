@@ -11,7 +11,7 @@ from datetime import timedelta
 import platform
 import yaml # Install with "pip install PyYAML"
 import socket
-import logging
+
 from pythonping import ping as pyping #Installer avec 'pip install pythonping'
 import struct
 import subprocess
@@ -234,9 +234,9 @@ def scale(value, from_min, from_max, to_min, to_max):
 	""" Fonction qui fait une mise à l'échelle flottante d'une plage à une autre """
 	return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
 
-def logger(name="main", existing=None, global_level=None, file_handler_level=logging.DEBUG, stream_handler_level=logging.DEBUG, 
+def logger(name="main", existing=None, global_level=None, file_handler_level=10, stream_handler_level=10, 
 	format='%(asctime)s | %(name)s:%(lineno)d [%(levelname)s] - %(message)s', stream_handler = True, file_handler = True, filename = "", file_handler_path = "./",
-	remove_existing_handlers=False):
+	remove_existing_handlers=False, http_handler_ip=None, http_handler_url="/logger/", http_handler_user="logger", http_handler_passwd="1234"):
 	""" configurer un logger et renvoyer l'objet configuré
 		name = nom du nouveau logger à créer
 		existing = logger existant à configurer
@@ -248,7 +248,12 @@ def logger(name="main", existing=None, global_level=None, file_handler_level=log
 		stream_handler = Vrai s'il faut l'activer
 		file_handler = Vrai s'il faut l'activer
 		filename = Nom du fichier de sortie (utilisé par exemple pour renvoyer la sortie des logger de différents modules vers le même fichier)
+
+		http_handler_ip : ip:port
 	"""
+
+	import logging
+	from logging.handlers import HTTPHandler
 
 	if existing is not None:
 		# Si un logger existant a été passé, on reprend son nom
@@ -300,6 +305,13 @@ def logger(name="main", existing=None, global_level=None, file_handler_level=log
 		else:
 			stream_handler.setLevel(stream_handler_level)
 		log.addHandler(stream_handler)
+	if http_handler_ip is not None:
+		# Si un http handler doit être ajouté
+		http_handler = HTTPHandler(host=http_handler_ip, url=http_handler_url, method="POST", 
+			credentials=(http_handler_user, http_handler_passwd))
+		http_handler.setLevel(10)
+		log.addHandler(http_handler)
+
 	return log
 
 class ip_configuration():
