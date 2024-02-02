@@ -71,7 +71,7 @@ def is_ip(addr):
 	""" Regarde si l'adresse est une adresse ip et renvoie un booléen """
 	if addr.count(".") != 3:
 		return False
-	bytes = addr.split(":")[0].split(".")
+	bytes = addr.split(":")[0].split("/")[0].split(".")
 	for byte in bytes:
 		if not byte.isdigit():
 			return False
